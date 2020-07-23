@@ -4,7 +4,7 @@
 
 <h1 align="center">gilstats.py</h1>
 <p align="center">
-    Find out if <a href="https://opensource.com/article/17/4/grok-gil">CPython GIL</a> is slowing you down
+    Find out if the <a href="https://opensource.com/article/17/4/grok-gil">CPython GIL</a> is slowing you down
 </p>
 
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) 
