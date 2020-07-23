@@ -20,7 +20,7 @@ The only thing prerequisite is to install `bcc-tools` on your system.
 You can follow the instructions here to install bcc-tools on your Linux system:
 https://github.com/iovisor/bcc/blob/master/INSTALL.md
 
-An example installtion for Ubuntu 18.04:
+An example installation for Ubuntu 18.04:
 
 ```bash
 > echo "deb [trusted=yes] https://repo.iovisor.org/apt/xenial xenial-nightly main" | sudo tee /etc/apt/sources.list.d/iovisor.list
