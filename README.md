@@ -9,7 +9,7 @@
 
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) 
 
-# gilstats.py
+## Introduction
 gilstats.py is a utility for dumping per-thread statistics for CPython GIL using eBPF (Linux only)
 
 ## Installation
