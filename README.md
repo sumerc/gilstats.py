@@ -4,7 +4,7 @@
 
 <h1 align="center">gilstats.py</h1>
 <p align="center">
-    Find out if CPython GIL is your friend or enemy
+    Find out if [CPython GIL](https://opensource.com/article/17/4/grok-gil) is a friend or enemy
 </p>
 
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) 
