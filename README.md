@@ -28,12 +28,13 @@ An example installtion for Ubuntu 18.04:
 > sudo apt-get install bcc-tools
 ```
 
+And then you can run the `gilstats.py` script providing a process to profile.
+
 ## Examples
 
 xxx
 
 ## How it works?
+
 xxx
 
-## Usage
-xxx
