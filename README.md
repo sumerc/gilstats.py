@@ -10,7 +10,7 @@
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) 
 
 ## Introduction
-`gilstats.py` is a utility for dumping per-thread statistics for CPython GIL using [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) (Linux only)
+`gilstats.py` is a utility for dumping per-thread statistics for CPython GIL using [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) (Linux only). It only requires you to provide a ProcessID of your application to collect the data.
 
 ## Installation
 `gilstats.py` uses [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) technology under the hood, thus requires Linux.
