@@ -32,7 +32,42 @@ And then you can run the `gilstats.py` script providing a process to profile.
 
 ## Examples
 
-xxx
+```
+> sudo /usr/bin/python gilstats.py -p 19402
+Attaching /lib/x86_64-linux-gnu/libpthread.so.0:^pthread_cond_timedwait$. Hit Ctrl+C to stop.
+^C
+*** Per-thread Results
+[
+    {
+        "tid": 19437, 
+        "ttot_secs": 7, 
+        "ncall": 2191
+    }, 
+    {
+        "tid": 19438, 
+        "ttot_secs": 7, 
+        "ncall": 2191
+    }, 
+    {
+        "tid": 19436, 
+        "ttot_secs": 7, 
+        "ncall": 2190
+    }, 
+    {
+        "tid": 19435, 
+        "ttot_secs": 0, 
+        "ncall": 14
+    }
+]
+
+*** Total elapsed: 11.4190039635 secs
+```
+
+You can see the `time spent in secs` for every thread probed. 
+
+`tid` is the thread id. See [here](https://github.com/iovisor/bcc/blob/master/docs/reference_guide.md#4-bpf_get_current_pid_tgid) for more details.
+`ttot_secs` is the number of seconds this thread waited to acquire the GIL.
+`ncall` is the number of times this thread tried to acquire the GIL.
 
 ## How it works?
 
