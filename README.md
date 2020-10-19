@@ -10,7 +10,7 @@
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square) 
 
 ## Introduction
-`gilstats.py` is a utility for dumping per-thread statistics for CPython GIL using [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) (Linux only). It only requires you to provide a ProcessID of your application to collect the data.
+`gilstats.py` is a utility for dumping per-thread statistics for CPython GIL using [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) (Linux only). It only requires you to provide a ProcessID(`pid`) of your application to collect the data.
 
 ## Installation
 `gilstats.py` uses [eBPF](http://www.brendangregg.com/blog/2019-01-01/learn-ebpf-tracing.html) technology under the hood, thus requires Linux.
@@ -36,5 +36,20 @@ xxx
 
 ## How it works?
 
-xxx
+`gilstats.py` will first get your Python interpreter's major version. That is because the GIL implementation differs a lot between Python 2 and 3. You can find the reason on why here: https://www.youtube.com/watch?v=Obt-vMVdM8s. After retrieving the Python major version, we use eBPF to hook following library functions:
+
+```
+pthread:sem_wait                # Python2
+pthread:pthread_cond_timedwait  # Python3
+```
+
+These functions are the functions that actually _wait_ on GIL. On Python2, a GIL is a simple semaphore on Linux whereas on Python3 (3.2 and up) it is a condition variable. If we are able to track how much time a thread spent on these functions, we will be able to track how much time a thread waited to acquire the GIL. However, there is one more issue with this implementation. There might be some other code that might call these functions other than GIL acquisiton. So, how to solve this? Well, while I am not %100 sure this will work on every situation, here is the idea I have used:
+   
+   1) Measure every `sem_wait`/`pthread_cond_timedwait` and record `call_count` and `total time spent` along with the first argument passed to these functions(via using `PT_REGS_PARM1` call eBPF provides). For `sem_wait` call, the first parameter will be a pointer to a `sem_t *` structure whereas for `pthread_cond_timedwait` it will be a `pthread_cond_t *` pointer.
+   2) When probing finished, the GIL pointer will be the one with the maximum `call_count`. The reason this is true is because we assume for every other blocking call event GIL will be woken up. So, that means: there should be no more `sem_wait` call for a semaphore other than GIL itself. Needless to say: although the idea seem to work for most of the cases, I am still not sure if it is %100. Please open an issue where this assumption might actually be incorrect.
+   
+ 
+   
+
+
 
