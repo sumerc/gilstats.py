@@ -87,7 +87,7 @@ Again: although the idea seem to work for me well, I am still not sure if it is 
 
 ## Performance
 
-Since we are using `eBPF`, the performance overhead during monitoring is nearly zero.
+Since we are using `eBPF`, the performance overhead during monitoring is minimal.
 
 ## Future
 
