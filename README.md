@@ -50,7 +50,9 @@ These functions are the functions that actually _wait_ on GIL. On Python2, a GIL
    
 Again: although the idea seem to work for me well, I am still not sure if it is %100. Please open an issue where this assumption might actually be incorrect.
    
- 
+## Future
+
+While I am no expert on the subject, I think with a little bit of help, `gilstats.py` can be used to monitor the Ruby MRI GIL, too.
    
 
 
