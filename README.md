@@ -89,7 +89,7 @@ Since we are using `eBPF`, the performance overhead during monitoring is minimal
 
 ## Future
 
-While I am no expert on the subject, I think with a little bit of help, `gilstats.py` can be used to monitor the Ruby MRI GIL, too.
+I think with a little bit of help, `gilstats.py` can also be used to support other languages as well. E.g: the Ruby MRI GIL.
    
 
 
