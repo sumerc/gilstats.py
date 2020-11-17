@@ -82,8 +82,6 @@ These functions are the functions that actually _wait_ on GIL. On Python2, a GIL
    
    1) Measure every `sem_wait`/`pthread_cond_timedwait` and record `call_count` and `total time spent` along with the first argument passed to these functions(via using `PT_REGS_PARM1` call eBPF provides). For `sem_wait` call, the first parameter will be a pointer to a `sem_t *` structure whereas for `pthread_cond_timedwait` it will be a `pthread_cond_t *` pointer.
    2) When probing finished, the GIL pointer will be the one with the maximum `call_count`. The reason this is true is because we assume for every other blocking call event GIL will be woken up. So, that means: there should be no more `sem_wait` call for a semaphore other than GIL itself. 
-   
-Again: although the idea seem to work for me well, I am still not sure if it is %100. Please open an issue where this assumption might actually be incorrect.
 
 ## Performance
 
