@@ -7,12 +7,14 @@ import json
 import os
 import argparse
 import subprocess
-from bcc import BPF
+from bcc import _assert_is_bytes, lib, ct, BPF
 
 IS_PY3 = sys.version_info > (3, 0)
 
 examples = """examples:
-    ./gilstats -p 1234              # trace process 1234
+    ./gilstats -p 1234                                      # trace process 1234
+    ./gilstats -p 1234 -so pthread                          # trace process 1234, set probes in the libpthread.so library in an auto-detected location  
+    ./gilstats -p 1234 -so /lib/x86_64-linux-gnu/libc.so.6  # trace process 1234, set probes in the specific libc library  
 """
 parser = argparse.ArgumentParser(
     description="Time/Print GIL stats per-thread",
@@ -21,6 +23,19 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument(
     "-p", "--pid", type=int, required=True, help="trace this PID only"
+)
+parser.add_argument(
+    "-so", "--threading-library", type=str, required=False, default="c", help="""
+Shared library implementing the threading promitives used by CPython.
+You can either specify the full path to the library or pass "c" or "pthread" and rely on BPF's auto-discovery.
+
+On the newer glibc-based systems you can pass "c" that stands for libc.so.
+On the older glibc-based systems you can pass "pthread" that stands for libpthread.so.
+For everything else, e.g. musl-based systems like alpine, pass an explicit path to the library such as /lib/ld-musl-x86_64.so.1.
+
+You can manually find the needed library by reading the /proc/{pid}/maps file or calling `ldd {python_executable}`.
+Then check which of these libraries define the threading primitives: `nm --defined-only --dynamic {lib_path} | grep pthread_cond_timedwait`.
+"""
 )
 args = parser.parse_args()
 
@@ -93,6 +108,20 @@ int lock_exit(struct pt_regs *ctx) {
 
 """
 
+# Modified copy of https://github.com/iovisor/bcc/blob/c93a19aaf3f7eae9d6c9070309cc785c18575767/src/python/bcc/__init__.py#L986-L993
+def try_find_library_for_pid(libname: bytes, pid: int) -> bytes:
+    libname = _assert_is_bytes(libname)
+
+    # Note: this BCC function will look for a library actually used by the process with this pid.
+    # But if not found, it will fallback to searching the libraries in the global ldconfig cache,
+    # potentially finding the library unrelated to the running process. 
+    res = lib.bcc_procutils_which_so(libname, pid)
+    if not res:
+        raise Exception("Can't find library %s" % libname)
+    libpath = ct.cast(res, ct.c_char_p).value
+    lib.bcc_procutils_free(res)
+    return libpath
+
 
 # signal handler
 def signal_ignore(signal, frame):
@@ -125,8 +154,8 @@ start_time = time.time()
 
 try:
     exec_path = os.readlink("/proc/%d/exe" % (args.pid))
-except:
-    raise Exception("No Process with PID %d found." % (args.pid))
+except Exception as e:
+    raise Exception("No Process with PID %d found. []" % (args.pid, e))
 
 # get python version
 try:
@@ -137,11 +166,14 @@ except Exception as e:
         (exec_path, e)
     )
 
+if '/' in args.threading_library:
+    exec_path = args.threading_library
+else:
+    exec_path = try_find_library_for_pid(args.threading_library.encode(), args.pid)
+
 if py_maj_version == 2:
-    exec_path = BPF.find_library("pthread")
     sym_re = "^sem_wait$"
 elif py_maj_version == 3:
-    exec_path = BPF.find_library("pthread")
     sym_re = "^pthread_cond_timedwait$"
 
 if exec_path is None or len(exec_path) == 0:
@@ -149,7 +181,7 @@ if exec_path is None or len(exec_path) == 0:
 
 print('Attaching %s:%s. Hit Ctrl+C to stop.' % (exec_path, sym_re))
 
-b = BPF(text=code)
+b = BPF(text=code, cflags=["-Wno-macro-redefined"])
 b.attach_uprobe(
     name=exec_path,
     sym_re=sym_re,
@@ -201,7 +233,7 @@ while (1):
 
         if not gil_candidate:
             raise Exception(
-                'No gil candidate found. Maybe symbols are not intercepted properly? [%d]'
+                'No gil candidate found. Maybe symbols are not intercepted properly? You can try a different -so parameter. [%d lock stats]'
                 % (len(lock_stats))
             )
 
