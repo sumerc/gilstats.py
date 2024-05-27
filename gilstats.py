@@ -155,7 +155,7 @@ start_time = time.time()
 try:
     exec_path = os.readlink("/proc/%d/exe" % (args.pid))
 except Exception as e:
-    raise Exception("No Process with PID %d found. []" % (args.pid, e))
+    raise Exception("No Process with PID %d found. [%s]" % (args.pid, e))
 
 # get python version
 try:
